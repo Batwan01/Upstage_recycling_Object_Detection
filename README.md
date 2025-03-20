@@ -19,7 +19,7 @@
 - **어노테이션 형식**
     - COCO JSON
 
-## 2. 데이터 탐색(EDA)
+## 2. [데이터 탐색(EDA)](https://github.com/Batwan01/Upstage_recycling_Object_Detection/blob/main/eda.ipynb)
 
 ### 2.1 데이터 구조 확인
 
