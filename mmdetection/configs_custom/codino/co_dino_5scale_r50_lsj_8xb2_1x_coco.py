@@ -1,3 +1,4 @@
+# 현재 사용 x
 _base_ = 'mmdet::common/ssj_scp_270k_coco-instance.py'
 
 custom_imports = dict(
