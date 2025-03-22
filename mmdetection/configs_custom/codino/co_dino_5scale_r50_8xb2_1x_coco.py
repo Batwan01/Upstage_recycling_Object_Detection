@@ -45,7 +45,7 @@ train_dataloader = dict(
     dataset=dict(
         type='CocoDataset',
         data_root=data_root,
-        ann_file='train.json',
+        ann_file='train_split.json',
         data_prefix=dict(img='train/'),
         metainfo=dict(classes=classes),
         filter_cfg=dict(filter_empty_gt=False, min_size=32),
@@ -64,7 +64,7 @@ val_dataloader = dict(
         type='CocoDataset',
         data_root=data_root,
         ann_file='val.json',
-        data_prefix=dict(img='val/'),
+        data_prefix=dict(img='train/'),
         metainfo=dict(classes=classes),
         pipeline=test_pipeline,
         backend_args=None,

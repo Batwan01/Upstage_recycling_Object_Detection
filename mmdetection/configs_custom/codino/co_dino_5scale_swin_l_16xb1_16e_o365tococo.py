@@ -33,14 +33,14 @@ test_pipeline = [
 # 데이터로더 - 중첩 제거
 train_dataloader = dict(
     batch_size=2,
-    num_workers=2,
+    num_workers=4,
     persistent_workers=True,
     sampler=dict(type='DefaultSampler', shuffle=True),
     dataset=dict(
         type='CocoDataset',
         data_root=data_root,
-        ann_file='train.json',
-        data_prefix=dict(img='train/'),
+        ann_file='train_split.json',
+        data_prefix=dict(img=''),
         metainfo=dict(classes=classes),
         filter_cfg=dict(filter_empty_gt=False, min_size=32),
         pipeline=train_pipeline,
@@ -50,7 +50,7 @@ train_dataloader = dict(
 
 val_dataloader = dict(
     batch_size=2,
-    num_workers=2,
+    num_workers=4,
     persistent_workers=True,
     drop_last=False,
     sampler=dict(type='DefaultSampler', shuffle=False),
@@ -58,7 +58,7 @@ val_dataloader = dict(
         type='CocoDataset',
         data_root=data_root,
         ann_file='val.json',
-        data_prefix=dict(img='val/'),
+        data_prefix=dict(img=''),
         metainfo=dict(classes=classes),
         pipeline=test_pipeline,
         backend_args=None,
@@ -241,7 +241,7 @@ optim_wrapper = dict(
     paramwise_cfg=dict(custom_keys={'backbone': dict(lr_mult=0.1)})
 )
 
-max_epochs = 16
+max_epochs = 12
 train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=max_epochs, val_interval=1)
 val_cfg = dict(type='ValLoop')
 test_cfg = dict(type='TestLoop')
