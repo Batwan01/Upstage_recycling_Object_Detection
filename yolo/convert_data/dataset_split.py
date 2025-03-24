@@ -8,14 +8,14 @@ from text import process_labels  # Import the function from text.py
 random.seed(42)
 
 # Define the source dataset folder and target train/val folders
-dataset_folder = '../recycling_data/train'  # Replace with your actual dataset folder path
-train_folder = '../recycling_data/train/images'
-val_folder = '../recycling_data/val/images'
-train_labels_dir = '../recycling_data/train/labels'
-val_labels_dir = '../recycling_data/val/labels'
+dataset_folder = '../datasets/train'  # Replace with your actual dataset folder path
+train_folder = '../datasets/train/images'
+val_folder = '../datasets/val/images'
+train_labels_dir = '../datasets/train/labels'
+val_labels_dir = '../datasets/val/labels'
 
 # JSON file path
-json_file_path = '../recycling_data/train.json'  # Replace with your actual JSON file path
+json_file_path = '../datasets/train.json'  # Replace with your actual JSON file path
 
 # Image size configuration (adjust if needed)
 img_width = 1024
