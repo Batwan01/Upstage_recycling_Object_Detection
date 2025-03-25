@@ -1,247 +1,167 @@
-# python 3.4 버전 이상에서만 작동함
 import argparse
 import os
 from pathlib import Path
-
-from ensemble_boxes import *
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-
+from ensemble_boxes import *
+from multiprocessing import Pool
 
 def set_parser():
-    """
-    Set basic parser
-    백그라운드로 동시에 여러 ensemble을 진행할 수 있게 option을 만들었습니다
-
-    기본값은 ensemble.py가 있는 폴더 안에 target/ensemble 폴더가 있고
-        target : ensemble할 csv를 저장해 놓는 장소
-        ensemble : ensemble한 결과값이 나오는 장소
-    로 설정되어 있습니다. 밑의 -t 와 -o의 default 값을 바꾸거나, 파일이 실행될 때 옵션을 줌으로서 변경할 수 있습니다.
-
-    Returns:
-        ArgumentParser
-    """
-    parser = argparse.ArgumentParser(
-                    prog="Ensemble",
-                    description="Ensemble csv files")
+    parser = argparse.ArgumentParser(prog="Ensemble", description="Ensemble csv files")
     p = Path.cwd()
-    parser.add_argument('-n', '--name', type=str, default='weighted_boxes_fusion', help="앙상블 할 method")
-    parser.add_argument('-i', '--iou_thr', type=float, default=0.5, help="iou threshold")
-    parser.add_argument('-sbt', '--skip_box_thr', type=float, default=0.0001, help="skip box threshold")
-    parser.add_argument('-sig','--sigma', type=float, default=0.1, help="시그마 값")
-    parser.add_argument('-t', '--target_directory', type=str, default=p.joinpath('target'), help="앙상블을 진행할 csv가 있는 directory")
-    parser.add_argument('-o', '--output_directory', type=str, default=p.joinpath('ensemble'), help="앙상블한 csv가 저장될 directory")
-    parser.add_argument('-l', '--log_file', type=str, default=p.joinpath('ensemble/meta_data.md'), help="로그 파일을 저장하는 장소")
-    parser.add_argument('-w', '--width', type=int, default=1024, help="이미지 사이즈 크기")
-    parser.add_argument('-hi','--height', type=int, default=1024, help="이미지 사이즈 높이")
+    parser.add_argument('-n', '--name', type=str, default='weighted_boxes_fusion', help="앙상블 방법")
+    parser.add_argument('-i', '--iou_thr', type=float, default=0.5, help="IOU 임계값")
+    parser.add_argument('-sbt', '--skip_box_thr', type=float, default=0.0001, help="박스 스킵 임계값")
+    parser.add_argument('-sig', '--sigma', type=float, default=0.1, help="Soft NMS의 시그마 값")
+    parser.add_argument('-t', '--target_directory', type=str, default=p.joinpath('target'), help="앙상블 대상 CSV 디렉토리")
+    parser.add_argument('-o', '--output_directory', type=str, default=p.joinpath('ensemble'), help="앙상블 결과 저장 디렉토리")
+    parser.add_argument('-l', '--log_file', type=str, default=p.joinpath('meta_data.md'), help="로그 파일 경로")
+    parser.add_argument('-w', '--width', type=int, default=1024, help="이미지 너비")
+    parser.add_argument('-hi', '--height', type=int, default=1024, help="이미지 높이")
     return parser
 
-def return_image_ids(output_dir):
-    output_list = os.listdir(output_dir)
-    csv_data = pd.read_csv(os.path.join(output_dir, output_list[0]))
-    return list(csv_data['image_id'])
+def load_all_csv_data(target_dir):
+    csv_datas = {}
+    for output in sorted(os.listdir(target_dir)):
+        if not output.endswith('.csv'):
+            continue
+        csv_path = os.path.join(target_dir, output)
+        try:
+            csv_data = pd.read_csv(csv_path).set_index('image_id', drop=False)
+            csv_datas[output] = csv_data
+            print(f"Loaded: {output}")
+        except Exception as e:
+            print(f"Warning: Failed to load {csv_path} - {e}")
+    return csv_datas
 
-def save_target_data(target_dir, log_file_name = 'meta_file.md'):
-    """
-    앙상블을 할 csv 파일들의 이름을 'meta_file.md' 에 저장하는 함수입니다.
+def return_image_ids(csv_datas):
+    image_ids = set()
+    for csv_data in csv_datas.values():
+        image_ids.update(csv_data['image_id'].unique())
+    return sorted(list(image_ids))
 
-    Args:
-        target_dir (str): 앙상블을 할 csv 파일의 이름
-        log_file_name (str, optional): 로그 파일 이름을 설정합니다. Defaults to 'meta_file.md'.
-    """
-    with open(log_file_name, 'a') as f:
-        f.write("Ensemble target: \n")
-        target_list = os.listdir(target_dir)
-        for target_file in target_list:
-            f.write(f'- {target_file}\n')
-    print("Sucess: save to target name")
+def save_target_data(target_dir, log_file_name='meta_data.md'):
+    try:
+        os.makedirs(os.path.dirname(log_file_name), exist_ok=True)
+        with open(log_file_name, 'a') as f:
+            f.write("Ensemble target:\n")
+            for target_file in os.listdir(target_dir):
+                if target_file.endswith('.csv'):
+                    f.write(f'- {target_file}\n')
+        print("Success: Saved target names to log")
+    except Exception as e:
+        print(f"Error saving target data: {e}")
 
-
-def save_output_data(submission, submission_file, log_file = 'meta_file.md', error_msg = None):
-    
+def save_output_data(submission, submission_file, log_file='meta_data.md', error_msg=None):
     p = Path(submission_file)
     try:
         os.makedirs(p.parent, exist_ok=True)
-        submission.to_csv(submission_file, index=False) # csv file로 변환 & 저장
-
-        condition = 'Success'
-        if error_msg:
-            condition = 'Error'        
-        with open(p.joinpath(log_file), 'a') as f:
+        submission.to_csv(submission_file, index=False)
+        condition = 'Success' if not error_msg else 'Error'
+        os.makedirs(os.path.dirname(log_file), exist_ok=True)
+        with open(log_file, 'a') as f:
             f.write(f"{condition}: Submission file saved to {submission_file}\n")
-            if error_msg: f.write(f'{error_msg}\n')
-        print("Sucess: save to status and Ensemble file")
+            if error_msg:
+                f.write(f'Error details: {error_msg}\n')
+        print(f"{condition}: Saved submission to {submission_file}")
     except Exception as e:
-        print(f"Error: ")
-        print(e)
+        print(f"Error saving submission: {e}")
     return submission_file
 
-# ensemble_boxes format 
-# image_id 하나당 파일을 계속 반복적으로 불러오기 때문에 시간이 오래 걸리는 것이다.
-# csv_datas는 한 번만 실행해도 충분한데 왜 이렇게 짰지?
-
-def get_csv_datas(target_dir):
-    # output_dir에서 csv 파일 목록을 뽑아서 csv data를 csv_datas에 저장
-    csv_datas = []
-    output_list = os.listdir(target_dir)
-    for output in output_list:
-        csv_data = pd.read_csv(os.path.join(target_dir, output))
-        csv_datas.append(csv_data)
-    return csv_datas
-
 def make_ensemble_format_per_image(image_id, csv_datas, image_width, image_height):
-    # 각 image id 별로 submission file에서 box좌표 추출
-    boxes_list = []
-    scores_list = []
-    labels_list = []
-
-    # 각 submission file 별로 prediction box좌표 불러오기
-    for idx, csv_data in enumerate(csv_datas):
-        predict_to_list = csv_data[csv_data['image_id'] == image_id]['PredictionString'].tolist()
-        if len(predict_to_list) == 0: continue # 예측 못했을 경우 예외처리
-        else: predict_string = predict_to_list[0]
-        predict_list = str(predict_string).split()
-
-        # 결측값 및 하나만 있는 predict는 아예 이용하지 않는다.
-        if len(predict_list)==0 or len(predict_list)==1:
+    boxes_list, scores_list, labels_list = [], [], []
+    for csv_data in csv_datas:
+        predict_row = csv_data[csv_data['image_id'] == image_id]['PredictionString']
+        if predict_row.empty:
+            continue
+        predict_string = predict_row.iloc[0]
+        if pd.isna(predict_string) or len(str(predict_string).strip()) < 2:
             continue
 
-        predict_list = np.reshape(predict_list, (-1, 6))
-        box_list = []
+        predict_list = np.array(str(predict_string).split()).reshape(-1, 6)
+        boxes = predict_list[:, 2:6].astype(float) / [image_width, image_height, image_width, image_height]
+        scores = predict_list[:, 1].astype(float)
+        labels = predict_list[:, 0].astype(int)
 
-        for box in predict_list[:, 2:6].tolist():
+        if (boxes > 1).any() or (boxes < 0).any():
+            print(f"Warning: Boxes out of range for image_id {image_id}")
 
-            # assert 코드가 발생하면 강제로라도 변환 불가 -> 시간 자원 아까움
-            # box의 각 좌표를 float형으로 변환한 후 image의 넓이와 높이로 각각 정규화
-            if float(box[0]) > image_width or float(box[2]) > image_width:
-                print('out of image_width',idx,box[0],box[2])
-            elif float(box[1]) > image_height or float(box[3]) > image_height:
-                print('out of image height',idx,box[1], box[3])
-            box[0] = float(box[0]) / image_width
-            box[1] = float(box[1]) / image_height
-            box[2] = float(box[2]) / image_width
-            box[3] = float(box[3]) / image_height
-            box_list.append(box)
-
-
-        boxes_list.append(box_list)
-        scores_list.append(list(map(float, predict_list[:, 1].tolist())))
-        labels_list.append(list(map(int, predict_list[:, 0].tolist())))
+        boxes_list.append(boxes.tolist())
+        scores_list.append(scores.tolist())
+        labels_list.append(labels.tolist())
     return boxes_list, scores_list, labels_list
 
-# csv 파일 별로 image_width, image_height를 주입하고 그걸 하나로 묶는 코드를 완성해야 한다.
-
 def prediction_format_per_image(boxes, scores, labels, image_width, image_height):
+    if len(boxes) == 0 or boxes is None:  # 수정된 조건
+        return ''
     output = ''
     for box, score, label in zip(boxes, scores, labels):
-        
-        # label이 float64로 찍히므로, 반드시 변환한다.
-        label = int(label)
+        box = [min(max(b, 0), 1) for b in box]
+        x1, y1, x2, y2 = [b * s for b, s in zip(box, [image_width, image_height, image_width, image_height])]
+        output += f'{int(label)} {score} {x1} {y1} {x2} {y2} '
+    return output.strip()
 
-        # 좌표가 [0,1] 사이에 있지 않는 경우, 이로 맞춰준다.
-        box[0] = min(max(box[0], 0), 1)
-        box[1] = min(max(box[1], 0), 1)
-        box[2] = min(max(box[2], 0), 1)
-        box[3] = min(max(box[3], 0), 1)
+def process_image(args_tuple):
+    image_id, csv_datas, ensemble_name, iou_thr, skip_box_thr, sigma, width, height = args_tuple
+    boxes, scores, labels = make_ensemble_format_per_image(image_id, csv_datas, width, height)
+    if not boxes:
+        return image_id, ''
 
-        # normalize된 box의 좌표를 바꿔준다.
-        output += f'{label} {score} {box[0]*image_width} {box[1]*image_height} {box[2]*image_width} {box[3]*image_height} '
-    return output[:-1]
+    weights = [2, 1]
+    if len(csv_datas) != 2:
+        print(f"Warning: Expected 2 models, but got {len(csv_datas)}. Using equal weights.")
+        weights = [1] * len(boxes)
 
-def check_prediction_over(boxes):
-    if len(boxes) == 0: return 0
-    return np.array([boxes[0]>1, boxes[1]>1, boxes[2]>1, boxes[3]>1]).any()
+    if ensemble_name == 'nms':
+        results = nms(boxes, scores, labels, weights=weights, iou_thr=iou_thr)
+    elif ensemble_name == 'soft_nms':
+        results = soft_nms(boxes, scores, labels, weights=weights, iou_thr=iou_thr, sigma=sigma, thresh=skip_box_thr)
+    elif ensemble_name == 'non_maximum_weighted':
+        results = non_maximum_weighted(boxes, scores, labels, weights=weights, iou_thr=iou_thr, skip_box_thr=skip_box_thr)
+    elif ensemble_name == 'weighted_boxes_fusion':
+        results = weighted_boxes_fusion(boxes, scores, labels, weights=weights, iou_thr=iou_thr, skip_box_thr=skip_box_thr)
+    else:
+        raise ValueError(f"Unknown ensemble method: {ensemble_name}")
+    
+    return image_id, prediction_format_per_image(*results, width, height)
 
 def main():
-    # 
     parser = set_parser()
     args = parser.parse_args()
+
     ensemble_name = args.name
     iou_thr = args.iou_thr
     skip_box_thr = args.skip_box_thr
     sigma = args.sigma
-    target = args.target_directory
-    output = args.output_directory
+    target_dir = args.target_directory
+    output_dir = args.output_directory
     log_file = args.log_file
     image_width = args.width
     image_height = args.height
 
-    image_ids = return_image_ids(target)
+    csv_datas = load_all_csv_data(target_dir)
+    if not csv_datas:
+        print("Error: No valid CSV files found in target directory")
+        return
 
-    # Prediction 저장하는 list만들기
-    prediction_strings = []
+    image_ids = return_image_ids(csv_datas)
+    save_target_data(target_dir, log_file)
 
-    # 파일 이름 글로벌하게 만들기
-    file_name = f'{ensemble_name}_error.csv'
+    args_list = [(image_id, list(csv_datas.values()), ensemble_name, iou_thr, skip_box_thr, sigma, image_width, image_height) 
+                 for image_id in image_ids]
+    
+    with Pool() as pool:
+        results = list(tqdm(pool.imap(process_image, args_list), total=len(image_ids)))
 
-    # 에러 메세지 저장
-    error_msg = None
+    image_ids, prediction_strings = zip(*results)
+    submission = pd.DataFrame({'image_id': image_ids, 'PredictionString': prediction_strings})
 
-    # ensemble한 target data 이름 저장
-    try:
-        save_target_data(target_dir=target, log_file_name=log_file)
-    except:
-        print("Error to save target name")
+    output_file = Path(output_dir) / f'{ensemble_name}_result.csv'
+    save_output_data(submission, output_file, log_file)
 
-    try: 
-        csv_datas = get_csv_datas(target_dir=target)
-        for image_idx, image_id in enumerate(tqdm(image_ids)):
-            
-            boxes, scores, labels = make_ensemble_format_per_image(image_id, csv_datas, image_width = image_width, image_height = image_height)
-
-            # 결측치 제거에 따라 예측 개수가 달라질 수 있다.
-            # 모델에 따른 함수는 나중에 만들도록 한다.
-
-            # 모델에 따른 가중치
-            weights = [1] * len(labels) 
-            
-            # 아예 box들이 예측되지 않는 경우 스킵한다.
-            if len(boxes) == 0: continue
-
-            # 앙상블 이름에 따라 분류
-            if ensemble_name == 'nms':
-                results = nms(boxes, scores, labels, weights=weights, iou_thr=iou_thr)
-            elif ensemble_name == 'soft_nms':
-                results = soft_nms(boxes, scores, labels, weights=weights, iou_thr=iou_thr, sigma=sigma, thresh=skip_box_thr)
-            elif ensemble_name == 'non_maximum_weighted':
-                results = non_maximum_weighted(boxes, scores, labels, weights=weights, iou_thr=iou_thr, skip_box_thr=skip_box_thr)
-            elif ensemble_name == 'weighted_boxes_fusion':
-                results = weighted_boxes_fusion(boxes, scores, labels, weights=weights, iou_thr=iou_thr, skip_box_thr=skip_box_thr)
-            else: raise "no such ensemble name"
-                
-            prediction_string = prediction_format_per_image(*results, image_width = image_width, image_height = image_height)
-            
-            prediction_strings.append(prediction_string)
-        
-        file_name = f'{ensemble_name}_result.csv'
-
-        # Submission
-        submission = pd.DataFrame()
-        submission['PredictionString'] = prediction_strings
-        submission['image_id'] = image_ids
-
-    # 통상적인 Exception
-    except Exception as e:
-        print(image_idx, "has a problem")
-        file_name = f'{ensemble_name}_error_{image_idx}.csv'
-        error_msg = e
-
-    # 강제로 Exception을 발생시킨 경우
-    # else로 검출이 안되는 점을 주의
-    except BaseException as e:
-        print("Force!!!")
-        print(f"Image {image_idx} has a problem")
-        file_name = f'{ensemble_name}_error_{image_idx}.csv'
-        error_msg = 'force exit'
-
-    # 예외와 관계없이 실행
-    finally:
-        p = Path(output)
-        file_name = p.joinpath(file_name)
-        print(error_msg, file_name)
-        submission_file = save_output_data(submission, file_name, log_file=log_file, error_msg = error_msg) # make submission file and save meta data
-        print(f"Submission file saved to {submission_file}")
-
-if __name__ == '__main__': 
+if __name__ == '__main__':
     main()
+
+# %cd /content/drive/MyDrive/Colab Notebooks/data/ensemble
+# !python ensemble.py -n weighted_boxes_fusion -t '/content/drive/MyDrive/Colab Notebooks/data/ensemble/csv' -o ./ensemble_csv -w 1024 -hi 1024 -i 0.5 -sbt 0.0001
