@@ -60,3 +60,36 @@
     
     <img src="https://github.com/user-attachments/assets/79656282-d7a5-4e70-857b-0b40ce347732" width="45%" /> <img src="https://github.com/user-attachments/assets/069f0f18-a262-4be3-8f31-8c3b6ec35fc0" width="45%" />
 
+## 3. 데이터 전처리 및 증강
+
+### 3.1 데이터셋 분할
+
+- **Train/Validation/check 비율**: 70/15/15
+- **Stratified Split 적용** (클래스별 샘플 개수 균형 고려)
+
+### 3.2 데이터 증강(Augmentation)
+
+- **기본 변환**: 크롭, 좌우 반전, 밝기 조절
+- **객체 보존 증강**: CutMix, MixUp, Mosaic 적용
+- **라이브러리 활용**: Albumentations
+- **## 3. 데이터 전처리 및 증강
+
+### 3.1 데이터셋 분할
+
+- **Train/Validation/check 비율**: 70/15/15
+- **Stratified Split 적용** (클래스별 샘플 개수 균형 고려)
+
+### 3.2 데이터 증강(Augmentation)
+
+- **기본 변환**: 크롭, 좌우 반전, 밝기 조절
+- **객체 보존 증강**: CutMix, MixUp, Mosaic 적용
+- **라이브러리 활용**: Albumentations
+- 커큘럼 러닝**: 점차 어려운 증강 적용
+
+## 4. 모델 선택 및 학습 설정
+
+### 4.1 모델 선정
+
+- **YOLOv11n**: 실시간 성능과 정확도의 균형을 고려하여 선택 (Yolo11x 사양문제로 Yolo11n으로 실험)
+- **CO-DETR**: 5-scale Swin-Large 백본, co_dino_5scale_swin_large_16e_o365tococo 가중치 사용
+- **비교 모델 실험**: YOLO11n
