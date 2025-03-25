@@ -109,3 +109,15 @@
 - **YOLOv11n**: 실시간 성능과 정확도의 균형을 고려하여 선택 (Yolo11x 사양문제로 Yolo11n으로 실험)
 - **CO-DETR**: 5-scale Swin-Large 백본, co_dino_5scale_swin_large_16e_o365tococo 가중치 사용
 - **비교 모델 실험**: YOLO11n
+
+### 5. 모델 학습 및 평가
+
+## 6. 모델 최적화 및 개선
+
+### 6.1 후처리 최적화
+
+- **NMS (Non-Maximum Suppression) 튜닝**
+- **Soft-NMS 및 Weighted Boxes Fusion 실험**
+- **Threshold 조정으로 탐지 성능 향상 시도**
+- **class wise**: 데이터를 Train/Validation/Check로 나눈 후, Check 데이터에서 클래스별로 높은 점수를 기록한 모델을 선별해 앙상블하려 했습니다.
+  - 모델 학습 시간이 길어 시간 부족으로 인해 구현하지 못했습니다.
