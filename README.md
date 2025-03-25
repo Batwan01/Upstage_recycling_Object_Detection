@@ -60,8 +60,7 @@
     
     <img src="https://github.com/user-attachments/assets/79656282-d7a5-4e70-857b-0b40ce347732" width="45%" /> <img src="https://github.com/user-attachments/assets/069f0f18-a262-4be3-8f31-8c3b6ec35fc0" width="45%" />
     
-    <img src="https://github.com/user-attachments/assets/c394ff01-065a-45b9-af73-a6c8e04b6287" width="45%" /> <img src="https://github.com/user-attachments/assets/4ff7169a-8bb9-48ce-9af9-40767d9fbe89" width="45%" />
-
+    <img src="https://github.com/user-attachments/assets/1b4ae7ac-0d01-4041-8f68-45e6128dace7" width="45%" /> <img src="https://github.com/user-attachments/assets/0969969a-c039-425f-aa4b-fd90aaca1a51" width="45%" />
 
 ## 3. 데이터 전처리 및 증강
 
