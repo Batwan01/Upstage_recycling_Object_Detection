@@ -93,8 +93,6 @@
     - Epochs: 10, 이미지 크기: 1024, 배치: 8  
     - 학습률: 0.001, Mosaic: 0.5, Mixup: 0.3, Rotate: ±30°, 강한 증강 적용
 
-# Object Detection Model Performance
-
 ## 4.1 모델 선정
 
 ### 4.1 모델 선정
@@ -139,7 +137,7 @@
 - **하드웨어**: Google Colab Pro, NVIDIA L4 GPU (24GB VRAM), 32GB RAM.
 - **소프트웨어**: PyTorch 2.0, Albumentations 1.3, Python 3.9.
 
-# 7. 한계점 및 미래 작업
+## 7. 한계점 및 미래 작업
 
 ## 한계점 (YOLO11n)
 - **탐지율 저하**: `General trash`와 `Metal` 클래스의 탐지율이 낮음(mAP 0.3 이하). 주요 원인은 작은 객체(예: 50x50 픽셀 미만)가 많아 모델이 이를 인식하는 데 어려움이 있음.
