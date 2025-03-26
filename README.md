@@ -48,13 +48,13 @@
   
     ![3476](https://github.com/user-attachments/assets/ab56b26e-cf75-4462-bf59-00f931bac627)
 
-- 라벨링 제거 및 추가
+- 라벨 제거 및 추가
   - 0067, 0134, 1624, 0230, 0906, 0975, 2629, 2961, 2971, 3106, 3501, 3539, 3560, 3797, 3904, 4098, 4100, 4165, 4191, 4209, 4260, 4357, 4408
 
     <img src="https://github.com/user-attachments/assets/17049fdf-cc61-4425-a75a-a3712399fd54" width="45%" /> <img src="https://github.com/user-attachments/assets/b46c029b-e073-45b7-b289-5702267885df" width="45%" />
 
   
-- 잘못된 라벨링 정제
+- 잘못된 라벨 정제
   - 0210, 1569, 2361, 2422, 2424, 2505, 3127, 3163, 4153, 4186, 4225, 4270
     
     <img src="https://github.com/user-attachments/assets/79656282-d7a5-4e70-857b-0b40ce347732" width="45%" /> <img src="https://github.com/user-attachments/assets/069f0f18-a262-4be3-8f31-8c3b6ec35fc0" width="45%" />
