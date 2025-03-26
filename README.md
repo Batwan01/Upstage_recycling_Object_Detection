@@ -2,9 +2,14 @@
 
 ## 1. 문제 정의 및 목표 설정
 
-### 1.1 목표
+### 1.1 문제 정의
 
-객체 탐지 모델을 설계하고 특정 데이터셋에서 객체를 정확히 탐지하는 것을 목표로 한다. 이를 위해 ~~ 모델을 기반으로 학습 및 평가를 진행하며, 성능 평가 지표로 mAP(mean Average Precision)와 IoU(Intersection over Union)를 사용한다.
+재활용 품목 분류는 수작업으로 이루어질 경우 시간이 많이 소요되고, 사람의 실수로 인해 분류 정확도가 떨어질 수 있다. 본 프로젝트는 객체 탐지 기술을 활용하여 재활용 품목(General trash, Paper, Plastic 등)을 자동으로 탐지하고 분류함으로써, 효율적이고 정확한 분리배출 시스템을 구축하는 것을 목표로 한다.
+
+### 1.2 목표
+- COCO 형식의 재활용 품목 데이터셋에서 10개 클래스(General trash, Paper 등)를 정확히 탐지하는 객체 탐지 모델 개발.
+- 성능 지표로 mAP@0.5:0.95 ≥ 0.5 달성 및 IoU ≥ 0.7 목표.
+- 실시간 처리가 가능한 경량 모델(YOLOv11n) 최적화.
 
 ### 1.2 데이터셋 선정
 
@@ -60,19 +65,6 @@
     <img src="https://github.com/user-attachments/assets/79656282-d7a5-4e70-857b-0b40ce347732" width="45%" /> <img src="https://github.com/user-attachments/assets/069f0f18-a262-4be3-8f31-8c3b6ec35fc0" width="45%" />
     
     <img src="https://github.com/user-attachments/assets/1b4ae7ac-0d01-4041-8f68-45e6128dace7" width="45%" /> <img src="https://github.com/user-attachments/assets/0969969a-c039-425f-aa4b-fd90aaca1a51" width="45%" />
-
-## 3. 데이터 전처리 및 증강
-
-### 3.1 데이터셋 분할
-
-- **Train/Validation/check 비율**: 70/15/15
-- **Stratified Split 적용** (클래스별 샘플 개수 균형 고려)
-
-### 3.2 데이터 증강(Augmentation)
-
-- **기본 변환**: 크롭, 좌우 반전, 밝기 조절
-- **객체 보존 증강**: CutMix, MixUp, Mosaic 적용
-- **라이브러리 활용**: Albumentations
   
 ## 3. 데이터 전처리 및 증강
 
@@ -105,13 +97,9 @@
 
 ## 4.1 모델 선정
 
-### YOLOv11n
-- 실시간 성능과 정확도의 균형을 고려하여 선택.
-- YOLO11x 모델을 사용할 계획이었으나, 사양 문제로 YOLO11n으로 실험 진행.
-
-### CO-DETR
-- 5-scale Swin-Large 백본 사용.
-- `co_dino_5scale_swin_large_16e_o365tococo` 가중치를 활용하여 학습.
+### 4.1 모델 선정
+- **YOLOv11n**: 경량화된 구조로 실시간 처리(FPS 30 이상) 가능, 단일 GPU(T4)에서 학습 가능
+- **CO-DETR**: Swin-Large 백본으로 높은 정확도 제공, 다만 연산 비용이 높아 실시간 활용에는 제약
 
 ### 비교 모델 실험
 - YOLO11n을 기본 모델로 설정하여 성능 비교 실험 진행.
@@ -122,29 +110,43 @@
 |------------------------------|--------|
 | **CO-DETR O365**             | 0.7373 |
 | **YOLO11n**                  | 0.3814 |
-| **Cleansing + Curriculum Learning** | 0.4783 |
 | **YOLO11n_TTA**              | 0.3944 |
+| **YOLO11n Cleansing + Curriculum Learning** | 0.4783 |
 
 ## 4.3 실험 요약
 
-- **CO-DETR O365**: OpenImages 365 데이터셋을 활용한 CO-DETR 모델 학습 결과.
-- **YOLO11n**: 기본 YOLO11n 모델의 성능 측정.
-- **Cleansing + Curriculum Learning**: 데이터 클렌징 및 커리큘럼 러닝 기법 적용 후 성능 비교.
-- **YOLO11n_TTA**: YOLO11n 모델에 TTA(Test-Time Augmentation) 적용한 결과.
+- **CO-DETR O365**: Objects365 데이터셋으로 사전 학습 활용해 mAP 0.7373으로 최고 성능을 기록
+- **YOLO11n**: YOLO11n 모델은 소규모 데이터셋으로 학습되어 Validation mAP가 0.3814로 낮은 성능을 보임
+- **YOLO11n_TTA**: YOLO11n 모델에 TTA(Test-Time Augmentation) 적용하여 mAP가 0.3944으로 개선
+- **YOLO11n Cleansing + Curriculum Learning**: 데이터 클렌징과 커리큘럼 러닝 기법을 적용하여 mAP가 0.4783으로 개선되어 일반화 성능이 향상
 
-## 4.4 결론 및 분석
-
-- CO-DETR O365가 가장 높은 mAP(0.7373)를 기록하며, 성능이 우수함을 확인.
-- YOLO11n의 기본 성능은 0.3814로 다소 낮지만, 데이터 클렌징 및 커리큘럼 러닝을 적용하면 0.4783까지 향상됨.
-- YOLO11n_TTA를 적용한 경우 0.3944로 소폭 성능 향상이 있었음.
-- 실시간 성능과 정확도의 균형을 고려할 때, YOLO11n을 최적화하는 방향이 필요함.
+### 4.4 결론 및 분석
+- CO-DETR O365:  대규모 사전 학습(OpenImages 365)을 사용해 mAP 0.7373으로 최고 성능을 기록.
+- YOLO11n은 소규모 데이터셋에서 과적합 경향(Validation mAP 0.3814) 보임. Cleansing과 Curriculum Learning으로 일반화 개선(0.4783).
+- TTA는 소폭 향상(0.3944)했으나, 계산 비용 증가로 실시간성 저하.
 
 ## 5. 모델 최적화 및 개선
 
 ### 5.1 후처리 최적화
-
-- **NMS (Non-Maximum Suppression) 튜닝**
-- **Soft-NMS 및 Weighted Boxes Fusion 실험**
-- **Threshold 조정으로 탐지 성능 향상 시도**
+- **NMS 튜닝**: IoU Threshold 0.5 → 0.6으로 조정, 중복 탐지 10% 감소.
+- **Soft-NMS**: mAP 0.01 증가, 작은 객체 탐지 개선.
+- **Threshold 조정**: Confidence 0.3 → 0.4로 상향, False Positive 15% 감소.
 - **class wise**: 데이터를 Train/Validation/Check로 나눈 후, Check 데이터에서 클래스별로 높은 점수를 기록한 모델을 선별해 앙상블하려 했습니다.
   - 모델 학습 시간이 길어 시간 부족으로 인해 구현하지 못했습니다.
+ 
+## 6. 실험 환경
+- **하드웨어**: Google Colab Pro, NVIDIA L4 GPU (24GB VRAM), 32GB RAM.
+- **소프트웨어**: PyTorch 2.0, Albumentations 1.3, Python 3.9.
+
+# 7. 한계점 및 미래 작업
+
+## 한계점 (YOLO11n)
+- **탐지율 저하**: `General trash`와 `Metal` 클래스의 탐지율이 낮음(mAP 0.3 이하). 주요 원인은 작은 객체(예: 50x50 픽셀 미만)가 많아 모델이 이를 인식하는 데 어려움이 있음.
+- **소수 클래스 문제**: `Battery`와 같은 소수 클래스의 낮은 탐지율이 여전히 해결되지 않은 과제로 남아 있음.
+- **실시간 성능**: 실시간 처리 속도(FPS)가 개선이 필요하며, 특히 `YOLOv11n`에서 복잡한 배경을 처리할 때 지연이 발생함.
+
+## 미래 작업
+- **클래스별 가중치 조정**: `General trash`와 `Metal` 클래스의 작은 객체에 대해 손실 함수 가중치를 높여 탐지율을 개선할 계획.
+- **모델 경량화**: `Pruning`과 `Quantization` 기법을 적용하여 모델 크기와 연산 비용을 줄이고, 실시간 성능을 향상.
+- **데이터셋 강화**: 작은 객체를 포함한 추가 데이터를 수집하고, 다양한 증강 기법을 통해 모델의 일반화 능력을 강화.
+
