@@ -123,7 +123,7 @@ anchors:
 
 | Model                        | mAP    |
 |------------------------------|--------|
-| **CO-DETR O365 cleansing**             | 0.7373 |
+| **CO-DETR O365 Cleansing**             | 0.7373 |
 | **YOLO11n**                  | 0.3814 |
 | **YOLO11n Cleansing + Curriculum Learning** | 0.4783 |
 | **YOLO11n_TTA**              | 0.3944 |
