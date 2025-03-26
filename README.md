@@ -124,7 +124,7 @@ anchors:
 | **YOLO11n**                  | 0.3814 |
 | **YOLO11n Cleansing + Curriculum Learning** | 0.4783 |
 | **YOLO11n_TTA**              | 0.3944 |
-
+| **YOLO11n_Cleansing + Curriculum Learning + TTA**              | 1 |
 
 ### 4.3 실험 요약
 
