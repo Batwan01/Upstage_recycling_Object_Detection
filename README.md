@@ -153,7 +153,7 @@ anchors:
 |--------------------------|-------|--------|
 | WBF (O365 + Codino)     | 1:1   | 0.7297 |
 | WBF (O365 + YOLO11n)    | 2:1   | 0.7180 |
-
+| WBF (O365 + YOLO11n_TTA)    | 2:1   | 0.6490 |
 ## 6. 실험 환경
 - **하드웨어**: Google Colab Pro, NVIDIA L4 GPU (24GB VRAM), 32GB RAM.
 - **소프트웨어**: PyTorch 2.0, Albumentations 1.3, Python 3.9.
