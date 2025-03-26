@@ -70,7 +70,7 @@
 
 ### 3.1 데이터셋 분할
 
-- **Train/Validation/check 비율**: 70/15/15
+- **Train/Validation/check 비율**: 70/15/15 (check: class wise 용도)
 - **Stratified Split 적용** (클래스별 샘플 개수 균형 고려)
 
 ### 3.2 데이터 증강(Augmentation)
