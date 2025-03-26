@@ -110,8 +110,11 @@ anchors:
 ## 4 모델 선정
 
 ### 4.1 모델 선정
-- **YOLOv11n**: 경량화된 구조로 실시간 처리(FPS 30 이상) 가능, 단일 GPU(T4)에서 학습 가능
+<img src="https://github.com/user-attachments/assets/5ef51ff4-f8e5-4b36-a8ca-137b51bf184a" width="70%"/>
+
 - **CO-DETR**: Swin-Large 백본으로 높은 정확도 제공, 다만 연산 비용이 높아 실시간 활용에는 제약
+- **YOLOv11n**: 경량화된 구조로 실시간 처리(FPS 30 이상) 가능, 단일 GPU(T4)에서 학습 가능
+
 
 ### 비교 모델 실험
 - YOLO11n을 기본 모델로 설정하여 성능 비교 실험 진행.
