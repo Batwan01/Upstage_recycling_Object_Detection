@@ -100,20 +100,48 @@
   - **Hard**: 복잡한 상황 대응 학습  
     - Epochs: 10, 이미지 크기: 1024, 배치: 8  
     - 학습률: 0.001, Mosaic: 0.5, Mixup: 0.3, Rotate: ±30°, 강한 증강 적용
-    
-## 4. 모델 선택 및 학습 설정
 
-### 4.1 모델 선정
+# Object Detection Model Performance
 
-- **YOLOv11n**: 실시간 성능과 정확도의 균형을 고려하여 선택 (Yolo11x 사양문제로 Yolo11n으로 실험)
-- **CO-DETR**: 5-scale Swin-Large 백본, co_dino_5scale_swin_large_16e_o365tococo 가중치 사용
-- **비교 모델 실험**: YOLO11n
+## 4.1 모델 선정
 
-### 5. 모델 학습 및 평가
-co_dino_5scale_lsj_swin_large_3x_coco_1 + o365
-## 6. 모델 최적화 및 개선
+### YOLOv11n
+- 실시간 성능과 정확도의 균형을 고려하여 선택.
+- YOLO11x 모델을 사용할 계획이었으나, 사양 문제로 YOLO11n으로 실험 진행.
 
-### 6.1 후처리 최적화
+### CO-DETR
+- 5-scale Swin-Large 백본 사용.
+- `co_dino_5scale_swin_large_16e_o365tococo` 가중치를 활용하여 학습.
+
+### 비교 모델 실험
+- YOLO11n을 기본 모델로 설정하여 성능 비교 실험 진행.
+
+## 4.2 실험 결과 (mAP)
+
+| Model                        | mAP    |
+|------------------------------|--------|
+| **CO-DETR O365**             | 0.7373 |
+| **YOLO11n**                  | 0.3814 |
+| **Cleansing + Curriculum Learning** | 0.4783 |
+| **YOLO11n_TTA**              | 0.3944 |
+
+## 4.3 실험 요약
+
+- **CO-DETR O365**: OpenImages 365 데이터셋을 활용한 CO-DETR 모델 학습 결과.
+- **YOLO11n**: 기본 YOLO11n 모델의 성능 측정.
+- **Cleansing + Curriculum Learning**: 데이터 클렌징 및 커리큘럼 러닝 기법 적용 후 성능 비교.
+- **YOLO11n_TTA**: YOLO11n 모델에 TTA(Test-Time Augmentation) 적용한 결과.
+
+## 4.4 결론 및 분석
+
+- CO-DETR O365가 가장 높은 mAP(0.7373)를 기록하며, 성능이 우수함을 확인.
+- YOLO11n의 기본 성능은 0.3814로 다소 낮지만, 데이터 클렌징 및 커리큘럼 러닝을 적용하면 0.4783까지 향상됨.
+- YOLO11n_TTA를 적용한 경우 0.3944로 소폭 성능 향상이 있었음.
+- 실시간 성능과 정확도의 균형을 고려할 때, YOLO11n을 최적화하는 방향이 필요함.
+
+## 5. 모델 최적화 및 개선
+
+### 5.1 후처리 최적화
 
 - **NMS (Non-Maximum Suppression) 튜닝**
 - **Soft-NMS 및 Weighted Boxes Fusion 실험**
