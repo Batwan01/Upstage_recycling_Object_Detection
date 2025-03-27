@@ -152,9 +152,12 @@ anchors:
 | 모델 조합                | 비율  | mAP    |
 |--------------------------|-------|--------|
 | WBF (O365 + Codino + YOLO)     | 1.5:1.5:1   | 0.7339 |
+| WBF (O365 + Codino)     | 2:1   | 0.7341 |
+| WBF (O365 + YOLO + WBF(0.7341) )     | 1.5:1:1.3   | 0.7297 |
 | WBF (O365 + Codino)     | 1:1   | 0.7297 |
 | WBF (O365 + YOLO11n)    | 2:1   | 0.7180 |
 | WBF (O365 + YOLO11n_TTA)    | 2:1   | 0.6490 |
+
 ## 6. 실험 환경
 - **하드웨어**: Google Colab Pro, NVIDIA L4 GPU (24GB VRAM), 32GB RAM.
 - **소프트웨어**: PyTorch 2.0, Albumentations 1.3, Python 3.9.
