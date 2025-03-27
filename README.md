@@ -127,7 +127,7 @@ anchors:
 | **YOLO11n**                  | 0.3814 |
 | **YOLO11n Cleansing + Curriculum Learning** | 0.4783 |
 | **YOLO11n_TTA**              | 0.3944 |
-| **YOLO11n_Cleansing + Curriculum Learning + TTA**              | 0.5271 |
+| **YOLO11n Cleansing + Curriculum Learning + TTA**              | 0.5271 |
 
 ### 4.3 실험 요약
 
@@ -135,6 +135,7 @@ anchors:
 - **YOLO11n**: YOLO11n 모델은 소규모 데이터셋으로 학습되어 Validation mAP가 0.3814로 낮은 성능을 보임
 - **YOLO11n Cleansing + Curriculum Learning**: 데이터 클렌징과 커리큘럼 러닝 기법을 적용하여 mAP가 0.4783으로 개선되어 일반화 성능이 향상
 - **YOLO11n_TTA**: TTA(Test-Time Augmentation) 적용하여 mAP 0.3944으로 개선
+- **YOLO11n Cleansing + Curriculum Learning + TTA**: 데이터 클렌징과 커리큘럼 러닝 기법, TTA를 적용하여 YOLO11n 최고 성능 0.5271으로 개선
 
 ### 4.4 결론 및 분석
 - CO-DETR O365:  대규모 사전 학습(OpenImages 365)을 사용해 mAP 0.7373으로 최고 성능을 기록.
