@@ -23,18 +23,25 @@
 - **어노테이션 형식**
     - COCO JSON
 
-## 2. [데이터 탐색(EDA)](https://github.com/Batwan01/Upstage_recycling_Object_Detection/blob/main/eda.ipynb)
+## 2. 데이터 탐색([EDA link](https://github.com/Batwan01/Upstage_recycling_Object_Detection/blob/main/eda.ipynb))
 
 ### 2.1 데이터 구조 확인
 
 - 이미지 및 라벨 데이터 구조 분석
 - 클래스별 객체 수 시각화
-- 바운딩 박스 크기 및 위치 분석
+  
+  <img src="https://github.com/user-attachments/assets/6b210852-a055-4a6c-a0d7-1274af12dfd3" width="45%" />
+  
+- 바운딩 박스 크기 및 위치 분석 (y축값 주의)
+  
+  <img src="https://github.com/user-attachments/assets/813d8ae5-3726-4e74-ad2f-3f28983ca5a1" width="45%" />
 
 ### 2.2 클래스 불균형 확인
 
-- 클래스별 데이터 수 시각화 (히스토그램)
-
+- 클래스별 데이터 수 시각화
+  
+  <img src="https://github.com/user-attachments/assets/d696b9b3-10fd-4c96-a46e-5d2e52c88189" width="45%" />
+  
 ### 2.3 데이터 품질 검사
 
 - 중복 이미지 및 잘못된 라벨링 확인
@@ -133,9 +140,9 @@ anchors:
 
 - **CO-DETR O365 cleansing**: 데이터 클렌징과 Objects365 데이터셋으로 사전 학습 활용해 mAP 0.7373으로 최고 성능을 기록 
 - **YOLO11n**: YOLO11n 모델은 소규모 데이터셋으로 학습되어 Validation mAP가 0.3814로 낮은 성능을 보임
-- **YOLO11n Cleansing + Curriculum Learning**: 데이터 클렌징과 커리큘럼 러닝 기법을 적용하여 mAP가 0.4783으로 개선되어 일반화 성능이 향상
-- **YOLO11n_TTA**: TTA(Test-Time Augmentation) 적용하여 mAP 0.3944으로 개선
-- **YOLO11n Cleansing + Curriculum Learning + TTA**: 데이터 클렌징과 커리큘럼 러닝 기법, TTA를 적용하여 YOLO11n 최고 성능 0.5271으로 개선
+- **YOLO11n Cleansing + Curriculum Learning**: 데이터 클렌징과 커리큘럼 러닝 기법을 적용하여 mAP가 0.4783으로 개선되어 일반화 성능이 향상 (Threshold 조정)
+- **YOLO11n_TTA**: TTA(Test-Time Augmentation) 적용하여 mAP 0.3944으로 개선 (Threshold 조정)
+- **YOLO11n Cleansing + Curriculum Learning + TTA**: 데이터 클렌징과 커리큘럼 러닝 기법, TTA를 적용하여 YOLO11n 최고 성능 0.5271으로 개선 (Threshold 조정)
 
 ### 4.4 결론 및 분석
 - CO-DETR O365:  대규모 사전 학습(OpenImages 365)을 사용해 mAP 0.7373으로 최고 성능을 기록.
