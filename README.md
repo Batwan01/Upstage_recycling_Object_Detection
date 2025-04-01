@@ -16,7 +16,7 @@
 - **데이터셋**
     - COCO (Common Objects in Context)
 - **클래스 개수**
-• 10 class : General trash, Paper, Paper pack, Metal, Glass, Plastic, Styrofoam, Plastic bag, Battery, Clothing
+  - 10 class : [ General trash, Paper, Paper pack, Metal, Glass, Plastic, Styrofoam, Plastic bag, Battery, Clothing ]
 - **이미지 크기**
     - height: 1024
     - width: 1024
