@@ -1,4 +1,4 @@
-# 재활용 품목 분류를 위한 Object Detection
+# 재활용 품목 분류를 위한 Object Detection (코딩테스트 통과)
 
 ## 1. 문제 정의 및 목표 설정
 
